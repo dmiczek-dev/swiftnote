@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:swiftnote/common/collapsing_list_tile.dart';
+import 'package:swiftnote/components/collapsing_list_tile.dart';
 import 'package:swiftnote/models/category.dart';
-import 'package:swiftnote/util/constants.dart';
+import 'package:swiftnote/utils/constants.dart';
 
 class CollapsingNavigationDrawer extends StatefulWidget {
   final List<Category> categories;
@@ -44,11 +44,11 @@ class _CollapsingNavigationDrawerState extends State<CollapsingNavigationDrawer>
       elevation: 2.0,
       child: Container(
         width: widthAnimation.value,
-        color: kSecondaryColor,
+        color: kPrimaryColor,
         child: Column(
           children: [
             SizedBox(
-              height: 60.0,
+              height: 20.0,
             ),
             categories != null
                 ? Expanded(

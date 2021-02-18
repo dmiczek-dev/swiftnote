@@ -1,8 +1,8 @@
 import 'package:circular_menu/circular_menu.dart';
 import 'package:flutter/material.dart';
-import 'package:swiftnote/common/collapsing_navigation_drawer.dart';
+import 'package:swiftnote/components/collapsing_navigation_drawer.dart';
 import 'package:swiftnote/models/category.dart';
-import 'package:swiftnote/util/constants.dart';
+import 'package:swiftnote/utils/constants.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -20,6 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     Size size = MediaQuery.of(context).size;
     return Scaffold(
+      backgroundColor: kSecondaryColor,
       appBar: AppBar(
         elevation: 0.0,
         backgroundColor: kSecondaryColor,
