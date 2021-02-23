@@ -8,7 +8,7 @@ class Category {
   String get name => _name;
 
   set name(String value) {
-    if (value.length <= 32) {
+    if (value.length <= 10) {
       _name = value;
     }
   }
@@ -21,6 +21,8 @@ class Category {
       map['id'] = _id;
     }
     map['name'] = _name;
+
+    return map;
   }
 
   Category.fromMapObject(Map<String, dynamic> map) {

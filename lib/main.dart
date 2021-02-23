@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:swiftnote/screens/home_screen.dart';
+import 'package:swiftnote/screens/note_list.dart';
 import 'package:swiftnote/utils/constants.dart';
 
 void main() {
@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
         primaryColor: kPrimaryColor,
         scaffoldBackgroundColor: kPrimaryColor,
       ),
-      home: HomeScreen(),
+      home: NoteList(),
     );
   }
 }

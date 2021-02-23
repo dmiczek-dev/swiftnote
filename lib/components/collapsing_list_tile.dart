@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:swiftnote/models/category.dart';
 import 'package:swiftnote/utils/constants.dart';
 
 class CollapsingListTile extends StatefulWidget {
-  final String name;
+  final Category category;
   final AnimationController animationController;
   final bool isSelected;
   final Function onTap;
   final Function onDeleteTap;
 
   CollapsingListTile(
-      {@required this.name,
+      {@required this.category,
       @required this.animationController,
       this.isSelected,
       this.onTap,
@@ -55,7 +56,7 @@ class _CollapsingListTileState extends State<CollapsingListTile> {
                 width: 38.0,
                 color: widget.isSelected ? kActiveColor : kSecondaryColor,
                 child: Text(
-                  widget.name[0],
+                  widget.category.name[0],
                   textAlign: TextAlign.center,
                   style: TextStyle(
                       color: widget.isSelected ? Colors.white : Colors.white30,
@@ -66,7 +67,7 @@ class _CollapsingListTileState extends State<CollapsingListTile> {
             ),
             widthAnimation.value >= 220
                 ? Text(
-                    widget.name,
+                    widget.category.name,
                     style: TextStyle(fontSize: 18.0),
                   )
                 : SizedBox(),

@@ -5,7 +5,9 @@ import 'package:swiftnote/utils/constants.dart';
 
 class CollapsingNavigationDrawer extends StatefulWidget {
   final List<Category> categories;
-  CollapsingNavigationDrawer({Key key, @required this.categories})
+  final Function callback;
+  CollapsingNavigationDrawer(
+      {Key key, @required this.categories, @required this.callback})
       : super(key: key);
   @override
   _CollapsingNavigationDrawerState createState() =>
@@ -34,12 +36,14 @@ class _CollapsingNavigationDrawerState extends State<CollapsingNavigationDrawer>
   @override
   Widget build(BuildContext context) {
     List<Category> categories = widget.categories;
+    Function callback = widget.callback;
     return AnimatedBuilder(
         animation: _animationController,
-        builder: (context, widget) => getWidget(context, widget, categories));
+        builder: (context, widget) =>
+            getWidget(context, widget, categories, callback));
   }
 
-  getWidget(context, widget, categories) {
+  getWidget(context, widget, categories, callback) {
     return Material(
       elevation: 2.0,
       child: Container(
@@ -55,14 +59,19 @@ class _CollapsingNavigationDrawerState extends State<CollapsingNavigationDrawer>
                     child: ListView.separated(
                       itemBuilder: (context, counter) {
                         return CollapsingListTile(
-                            name: categories[counter].name,
-                            animationController: _animationController,
-                            isSelected: currentSelectedIndex == counter,
-                            onTap: () {
-                              setState(() {
-                                currentSelectedIndex = counter;
-                              });
+                          category: categories[counter],
+                          animationController: _animationController,
+                          isSelected: currentSelectedIndex == counter,
+                          onTap: () {
+                            setState(() {
+                              currentSelectedIndex = counter;
                             });
+                          },
+                          onDeleteTap: () {
+                            callback(context, categories[counter]);
+                            currentSelectedIndex = 0;
+                          },
+                        );
                       },
                       separatorBuilder: (context, counter) {
                         return Divider(
