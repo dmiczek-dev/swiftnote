@@ -6,8 +6,12 @@ import 'package:swiftnote/utils/constants.dart';
 class CollapsingNavigationDrawer extends StatefulWidget {
   final List<Category> categories;
   final Function callback;
+  final Function callId;
   CollapsingNavigationDrawer(
-      {Key key, @required this.categories, @required this.callback})
+      {Key key,
+      @required this.categories,
+      @required this.callback,
+      @required this.callId})
       : super(key: key);
   @override
   _CollapsingNavigationDrawerState createState() =>
@@ -37,13 +41,14 @@ class _CollapsingNavigationDrawerState extends State<CollapsingNavigationDrawer>
   Widget build(BuildContext context) {
     List<Category> categories = widget.categories;
     Function callback = widget.callback;
+    Function callId = widget.callId;
     return AnimatedBuilder(
         animation: _animationController,
         builder: (context, widget) =>
-            getWidget(context, widget, categories, callback));
+            getWidget(context, widget, categories, callback, callId));
   }
 
-  getWidget(context, widget, categories, callback) {
+  getWidget(context, widget, categories, callback, callId) {
     return Material(
       elevation: 2.0,
       child: Container(
@@ -66,6 +71,7 @@ class _CollapsingNavigationDrawerState extends State<CollapsingNavigationDrawer>
                             setState(() {
                               currentSelectedIndex = counter;
                             });
+                            callId(categories[counter].id);
                           },
                           onDeleteTap: () {
                             callback(context, categories[counter]);

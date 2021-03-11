@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:swiftnote/components/collapsing_navigation_drawer.dart';
 import 'package:swiftnote/models/category.dart';
+import 'package:swiftnote/models/note.dart';
+import 'package:swiftnote/screens/note_detail.dart';
 import 'package:swiftnote/utils/constants.dart';
 import 'package:swiftnote/utils/database_helper.dart';
 
@@ -15,6 +17,7 @@ class _NoteList extends State<NoteList> {
   DatabaseHelper databaseHelper = new DatabaseHelper();
   List<Category> categories;
   Category category = Category('');
+  int currentCatId;
 
   TextEditingController nameController = TextEditingController();
   GlobalKey<CircularMenuState> key = GlobalKey<CircularMenuState>();
@@ -42,7 +45,9 @@ class _NoteList extends State<NoteList> {
           children: [
             Container(),
             CollapsingNavigationDrawer(
-                categories: categories, callback: _showDeleteDialog),
+                categories: categories,
+                callback: _showDeleteDialog,
+                callId: _setCurrentCategory),
             CircularMenu(
               key: key,
               toggleButtonMargin: 20.0,
@@ -72,7 +77,9 @@ class _NoteList extends State<NoteList> {
                   icon: Icons.note_add,
                   color: Colors.white,
                   onTap: () {
-                    setState(() {});
+                    print(currentCatId);
+                    navigateToDetail(
+                        Note('', '', '', currentCatId), 'Add Note');
                   },
                 )
               ],
@@ -104,9 +111,27 @@ class _NoteList extends State<NoteList> {
       categoriesFuture.then((categories) {
         setState(() {
           this.categories = categories;
+          this.currentCatId = categories[0].id;
         });
       });
     });
+  }
+
+  void updateListView() {}
+
+  void navigateToDetail(Note note, String title) async {
+    bool result =
+        await Navigator.push(context, MaterialPageRoute(builder: (context) {
+      return NoteDetail(title, note);
+    }));
+
+    if (result) {
+      updateListView();
+    }
+  }
+
+  Future<void> _setCurrentCategory(currentId) async {
+    this.currentCatId = currentId;
   }
 
   Future<void> _showCreateDialog(BuildContext context) async {

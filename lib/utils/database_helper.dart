@@ -4,14 +4,22 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:swiftnote/models/category.dart';
+import 'package:swiftnote/models/note.dart';
 
 class DatabaseHelper {
   static DatabaseHelper _databaseHelper;
   static Database _database;
 
   String categoryTable = 'category_table';
-  String colId = 'id';
-  String colName = 'name';
+  String colCatId = 'id';
+  String colCatName = 'name';
+
+  String noteTable = 'note_table';
+  String colNoteId = 'id';
+  String colNoteTitle = 'title';
+  String colNoteDesc = 'description';
+  String colNoteDate = 'date';
+  String colNoteCatId = 'catId';
 
   DatabaseHelper._createInstance();
 
@@ -39,15 +47,26 @@ class DatabaseHelper {
 
   void _createDb(Database db, int newVersion) async {
     await db.execute(
-        'CREATE TABLE $categoryTable($colId INTEGER PRIMARY KEY AUTOINCREMENT, $colName TEXT)');
+        'CREATE TABLE $categoryTable($colCatId INTEGER PRIMARY KEY AUTOINCREMENT, '
+        '$colCatName TEXT)');
+    await db.execute(
+        'CREATE TABLE $noteTable($colNoteId INTEGER PRIMARY KEY AUTOINCREMENT,'
+        '$colNoteTitle TEXT, $colNoteDesc TEXT, $colNoteDate TEXT, $colNoteCatId INTEGER)');
   }
 
-  // CRUD
+  // CRUD CATEGORY
 
   Future<List<Map<String, dynamic>>> getCategoryMapList() async {
     Database db = await this.database;
     var result = await db.query(categoryTable);
     return result;
+  }
+
+  Future<Map<String, dynamic>> getCategoryMap(int id) async {
+    Database db = await this.database;
+    var result =
+        await db.query(categoryTable, where: '$colCatId = ?', whereArgs: [id]);
+    return result[0];
   }
 
   Future<int> insertCategory(Category category) async {
@@ -59,14 +78,14 @@ class DatabaseHelper {
   Future<int> updateCategory(Category category) async {
     Database db = await this.database;
     var result = await db.update(categoryTable, category.toMap(),
-        where: '$colId = ?', whereArgs: [category.id]);
+        where: '$colCatId = ?', whereArgs: [category.id]);
     return result;
   }
 
   Future<int> deleteCategory(int id) async {
     Database db = await this.database;
     var result =
-        await db.rawDelete('DELETE FROM $categoryTable WHERE $colId = $id');
+        await db.rawDelete('DELETE FROM $categoryTable WHERE $colCatId = $id');
     return result;
   }
 
@@ -87,5 +106,30 @@ class DatabaseHelper {
       categoryList.add(Category.fromMapObject(categoryListMap[i]));
     }
     return categoryList;
+  }
+
+  Future<Category> getCategoryById(int id) async {
+    var categoryMap = await getCategoryMap(id);
+    return Category.fromMapObject(categoryMap);
+  }
+
+  // CRUD NOTE
+
+  Future<List<Map<String, dynamic>>> getNoteMapList() async {
+    Database db = await this.database;
+    var result = await db.query(noteTable, orderBy: '$colNoteDate ASC');
+    return result;
+  }
+
+  Future<List<Note>> getNoteList() async {
+    var noteListMap = await getNoteMapList();
+    int count = noteListMap.length;
+    List<Note> noteList = List<Note>.empty(growable: true);
+
+    for (int i = 0; i < count; i++) {
+      noteList.add(Note.fromMapObject(noteListMap[i]));
+    }
+
+    return noteList;
   }
 }
