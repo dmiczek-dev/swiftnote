@@ -16,8 +16,10 @@ class NoteList extends StatefulWidget {
 class _NoteList extends State<NoteList> {
   DatabaseHelper databaseHelper = new DatabaseHelper();
   List<Category> categories;
+  List<Note> notes;
   Category category = Category('');
   int currentCatId;
+  int count = 0;
 
   TextEditingController nameController = TextEditingController();
   GlobalKey<CircularMenuState> key = GlobalKey<CircularMenuState>();
@@ -27,6 +29,10 @@ class _NoteList extends State<NoteList> {
     if (categories == null) {
       categories = List<Category>.empty();
       updateDrawerView();
+    }
+
+    if (notes == null) {
+      notes = List<Note>.empty();
     }
 
     Size size = MediaQuery.of(context).size;
@@ -43,7 +49,7 @@ class _NoteList extends State<NoteList> {
         height: size.height,
         child: Stack(
           children: [
-            Container(),
+            getNoteListView(),
             CollapsingNavigationDrawer(
                 categories: categories,
                 callback: _showDeleteDialog,
@@ -90,6 +96,47 @@ class _NoteList extends State<NoteList> {
     );
   }
 
+  ListView getNoteListView() {
+    TextStyle titleStyle = Theme.of(context).textTheme.subhead;
+    return ListView.builder(
+      itemCount: count,
+      itemBuilder: (BuildContext context, int position) {
+        return Padding(
+          padding: const EdgeInsets.only(left: 78.0, right: 8.0, top: 8.0),
+          child: Card(
+            color: kPrimaryColor,
+            elevation: 2.0,
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: kActiveColor,
+                child: Icon(
+                  Icons.keyboard_arrow_right,
+                ),
+              ),
+              title: Text(
+                this.notes[position].title,
+                style: titleStyle,
+              ),
+              subtitle: Text(this.notes[position].description),
+              trailing: GestureDetector(
+                onTap: () {
+                  // _delete(context, noteList[position]);
+                },
+                child: Icon(
+                  Icons.delete,
+                  color: Colors.grey,
+                ),
+              ),
+              onTap: () {
+                navigateToDetail(this.notes[position], 'Edit Note');
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void _showSnackBar(String message) {
     final snackBar = SnackBar(
       content: Container(
@@ -109,15 +156,33 @@ class _NoteList extends State<NoteList> {
       Future<List<Category>> categoriesFuture =
           databaseHelper.getCategoryList();
       categoriesFuture.then((categories) {
-        setState(() {
-          this.categories = categories;
-          this.currentCatId = categories[0].id;
-        });
+        if (categories.isEmpty) {
+          Category initCategory = Category("Main");
+          databaseHelper.insertCategory(initCategory);
+          updateDrawerView();
+        } else {
+          setState(() {
+            this.categories = categories;
+            this.currentCatId = categories[0].id;
+          });
+          updateListView(categories[0].id);
+        }
       });
     });
   }
 
-  void updateListView() {}
+  void updateListView(int id) {
+    final Future<Database> dbFuture = databaseHelper.initializeDatabase();
+    dbFuture.then((database) {
+      Future<List<Note>> notesFuture = databaseHelper.getNoteListByCategory(id);
+      notesFuture.then((notes) {
+        setState(() {
+          this.notes = notes;
+          this.count = notes.length;
+        });
+      });
+    });
+  }
 
   void navigateToDetail(Note note, String title) async {
     bool result =
@@ -126,7 +191,7 @@ class _NoteList extends State<NoteList> {
     }));
 
     if (result) {
-      updateListView();
+      // updateListView();
     }
   }
 

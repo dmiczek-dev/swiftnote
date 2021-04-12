@@ -3,12 +3,12 @@ class Note {
   String _title;
   String _description;
   String _date;
-  int _categoryId;
+  int _catId;
 
-  Note(this._title, this._description, this._date, this._categoryId);
+  Note(this._title, this._description, this._date, this._catId);
 
   Note.withId(
-      this._id, this._title, this._description, this._date, this._categoryId);
+      this._id, this._title, this._description, this._date, this._catId);
 
   int get id => _id;
 
@@ -32,11 +32,11 @@ class Note {
     _date = value;
   }
 
-  int get categoryId => _categoryId;
+  int get categoryId => _catId;
 
   set categoryId(int value) {
     if (value != null) {
-      _categoryId = value;
+      _catId = value;
     }
   }
 
@@ -48,7 +48,7 @@ class Note {
     map['title'] = _title;
     map['description'] = _description;
     map['date'] = date;
-    map['categoryId'] = _categoryId;
+    map['catId'] = _catId;
 
     return map;
   }
@@ -58,6 +58,6 @@ class Note {
     _title = map['title'];
     _description = map['description'];
     _date = map['date'];
-    _categoryId = map['categoryId'];
+    _catId = map['catId'];
   }
 }

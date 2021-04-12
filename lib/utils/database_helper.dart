@@ -40,8 +40,12 @@ class DatabaseHelper {
   Future<Database> initializeDatabase() async {
     Directory directory = await getApplicationDocumentsDirectory();
     String path = directory.path + 'notes.db';
-    var notesDatabase =
-        await openDatabase(path, version: 1, onCreate: _createDb);
+    var notesDatabase = await openDatabase(path,
+        version: 3, onCreate: _createDb, onUpgrade: _upgradeDb);
+    // (await notesDatabase.query('sqlite_master', columns: ['type', 'name']))
+    //     .forEach((row) {
+    //   print(row.values);
+    // });
     return notesDatabase;
   }
 
@@ -49,6 +53,12 @@ class DatabaseHelper {
     await db.execute(
         'CREATE TABLE $categoryTable($colCatId INTEGER PRIMARY KEY AUTOINCREMENT, '
         '$colCatName TEXT)');
+    await db.execute(
+        'CREATE TABLE $noteTable($colNoteId INTEGER PRIMARY KEY AUTOINCREMENT,'
+        '$colNoteTitle TEXT, $colNoteDesc TEXT, $colNoteDate TEXT, $colNoteCatId INTEGER)');
+  }
+
+  void _upgradeDb(Database db, int newVersion, int oldVersion) async {
     await db.execute(
         'CREATE TABLE $noteTable($colNoteId INTEGER PRIMARY KEY AUTOINCREMENT,'
         '$colNoteTitle TEXT, $colNoteDesc TEXT, $colNoteDate TEXT, $colNoteCatId INTEGER)');
@@ -131,5 +141,44 @@ class DatabaseHelper {
     }
 
     return noteList;
+  }
+
+  Future<List<Map<String, dynamic>>> getNoteMapListByCategory(int id) async {
+    Database db = await this.database;
+    var result = await db.query(noteTable,
+        where: '$colCatId = ?', whereArgs: [id], orderBy: '$colNoteDate ASC');
+    return result;
+  }
+
+  Future<List<Note>> getNoteListByCategory(int id) async {
+    var noteListMap = await getNoteMapListByCategory(id);
+    int count = noteListMap.length;
+    List<Note> noteList = List<Note>.empty(growable: true);
+
+    for (int i = 0; i < count; i++) {
+      noteList.add(Note.fromMapObject(noteListMap[i]));
+    }
+
+    return noteList;
+  }
+
+  Future<int> insertNote(Note note) async {
+    Database db = await this.database;
+    var result = await db.insert(noteTable, note.toMap());
+    return result;
+  }
+
+  Future<int> updateNote(Note note) async {
+    Database db = await this.database;
+    var result = await db.update(noteTable, note.toMap(),
+        where: '$colCatId = ?', whereArgs: [note.id]);
+    return result;
+  }
+
+  Future<int> deleteNote(int id) async {
+    Database db = await this.database;
+    var result =
+        await db.rawDelete('DELETE FROM $noteTable WHERE $colNoteId = $id');
+    return result;
   }
 }

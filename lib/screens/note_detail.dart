@@ -2,6 +2,7 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:swiftnote/models/category.dart';
 import 'package:swiftnote/models/note.dart';
@@ -56,7 +57,10 @@ class _NoteDetailState extends State<NoteDetail> {
           padding: EdgeInsets.only(top: 15.0, left: 10.0, right: 10.0),
           child: ListView(
             children: [
-              getPicker(),
+              InputDecorator(
+                decoration: InputDecoration(border: OutlineInputBorder()),
+                child: getPicker(),
+              ),
               Padding(
                 padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
                 child: TextField(
@@ -78,6 +82,7 @@ class _NoteDetailState extends State<NoteDetail> {
                   maxLines: 8,
                   controller: descriptionController,
                   style: textStyle,
+                  textAlignVertical: TextAlignVertical.top,
                   onChanged: (value) {
                     updateDescription();
                   },
@@ -104,7 +109,7 @@ class _NoteDetailState extends State<NoteDetail> {
                         onPressed: () {
                           setState(() {
                             debugPrint('Save button clicked');
-                            // _save();
+                            _save();
                           });
                         },
                       ),
@@ -157,6 +162,33 @@ class _NoteDetailState extends State<NoteDetail> {
     });
   }
 
+  void _save() async {
+    moveToLastScreen();
+    note.date = DateFormat.yMMMd().format(DateTime.now());
+    int result;
+    if (note.id != null) {
+      result = await databaseHelper.updateNote(note);
+    } else {
+      result = await databaseHelper.insertNote(note);
+    }
+
+    if (result != 0) {
+      // Success
+      _showAlertDialog('Status', 'Note saved successfully');
+    } else {
+      // Failure
+      _showAlertDialog('Status', 'Problem saving note');
+    }
+  }
+
+  void _showAlertDialog(String title, String message) {
+    AlertDialog alertDialog = AlertDialog(
+      title: Text(title),
+      content: Text(message),
+    );
+    showDialog(context: context, builder: (_) => alertDialog);
+  }
+
   void updateTitle() {
     note.title = titleController.text;
   }
@@ -184,6 +216,7 @@ class _NoteDetailState extends State<NoteDetail> {
   DropdownButton<String> androidDropdown() {
     return DropdownButton(
       hint: Text('Select category...'),
+      underline: null,
       focusColor: Colors.white,
       style: textStyle,
       items: categories.map((Category category) {
